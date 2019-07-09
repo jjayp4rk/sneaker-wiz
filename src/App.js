@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import "./App.css";
 import Camera, { IMAGE_TYPES } from "react-html5-camera-photo";
 import "react-html5-camera-photo/build/css/index.css";
-import './Camera.css'
+import "./Camera.css";
 import "./Emoji";
 import Loader from "react-loader-spinner";
 
@@ -197,6 +197,7 @@ class App extends Component {
                   onTakePhoto={dataUri => {
                     this.onTakePhoto(dataUri);
                   }}
+                  idealFacingMode={FACING_MODES.ENVIRONMENT}
                 />
               </div>
             ) : null}

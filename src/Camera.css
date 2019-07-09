@@ -58,7 +58,7 @@
   width: 400px;
   margin: 0 auto;
 }
-@media (max-width: 768px) {
+@media (max-width: 450px) {
   .react-html5-camera-photo > .display-error,
   .react-html5-camera-photo > img,
   .react-html5-camera-photo > video {
