@@ -1,112 +1,249 @@
 import React, { Component } from "react";
-import axios from "axios";
 import "./App.css";
-import Camera from "react-html5-camera-photo";
-import "react-html5-camera-photo/build/css/index.css";
+import Camera, { IMAGE_TYPES } from "react-html5-camera-photo";
+import "./Camera.css";
+import "./Emoji";
+import Loader from "react-loader-spinner";
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      class: "",
+      shoeclass: "",
       confidence: "",
       loading: false,
-      success: false,
-      url: ""
+      cameraOn: true,
+      image: false,
+      key: "",
+      upload: false,
+      dataUri: "",
+      prediction: false
     };
   }
 
-  onTakePhoto(dataUri) {
-    const sneaker = dataUri.split(",")[1];
-    axios
-      .post(
-        "https://o1embtlbrb.execute-api.us-west-2.amazonaws.com/Dev/upload-sneaker",
-        {
-          sneaker: sneaker
-        }
-      )
-      .then(response => console.log(response));
-    this.setState({ loading: true });
-    // Do stuff with the dataUri photo...
-    console.log("takePhoto");
+  getBase64(file, cb) {
+    let reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function() {
+      cb(reader.result);
+    };
+    reader.onerror = function(error) {
+      console.log("Error: ", error);
+    };
   }
 
-  handleChange = event => {
-    this.setState({ success: false, url: "" });
+  showCamera = e => {
+    this.setState({
+      cameraOn: true,
+      image: false,
+      loading: false,
+      shoeclass: "",
+      confidence: "",
+      dataUri: "",
+      key: ""
+    });
   };
-  // Perform the upload
-  handleUpload = ev => {
-    let file = this.uploadInput.files[0];
-    // Split the filename to get the name and type
-    let fileParts = this.uploadInput.files[0].name.split(".");
-    let fileName = fileParts[0];
-    let fileType = fileParts[1];
-    console.log("Preparing the upload");
-    axios
-      .post(
-        "https://o1embtlbrb.execute-api.us-west-2.amazonaws.com/Dev/upload-sneaker",
-        {
-          fileName: fileName,
-          fileType: fileType
-        }
-      )
-      .then(response => {
-        var returnData = response.data.data.returnData;
-        var signedRequest = returnData.signedRequest;
-        var url = returnData.url;
-        this.setState({ url: url });
-        console.log("Recieved a signed request " + signedRequest);
 
-        // Put the fileType in the headers for the upload
-        var options = {
-          headers: {
-            "Content-Type": fileType
-          }
-        };
-        axios
-          .put(signedRequest, file, options)
-          .then(result => {
-            console.log("Response from s3");
-            this.setState({ success: true });
-          })
-          .catch(error => {
-            alert("ERROR " + JSON.stringify(error));
-          });
-      })
-      .catch(error => {
-        alert(JSON.stringify(error));
+  onTakePhoto(dataUri) {
+    const sneaker = dataUri.split(",")[1];
+    fetch(
+      "https://o1embtlbrb.execute-api.us-west-2.amazonaws.com/Dev/upload-sneaker",
+      {
+        method: "POST",
+        body: JSON.stringify({ sneaker: sneaker })
+      }
+    )
+      .then(response => response.json())
+      .then(data =>
+        this.setState({
+          key: data.key,
+          cameraOn: false,
+          loading: true,
+          dataUri: dataUri
+        })
+      )
+      .catch(err => console.log(err));
+  }
+
+  async predictShoe(url, options, n) {
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      let shoeclass = data.class.split("'")[1].replace(/_/g, " ");
+      let confidence = String(data.confidence * 100).substring(0, 5) + "%";
+      this.setState({
+        image: true,
+        loading: false,
+        shoeclass: shoeclass,
+        confidence: confidence,
+        upload: false,
+        prediction: true
       });
+    } catch (err) {
+      if (n === 1) throw err;
+      return await this.predictShoe(url, options, (n = 1));
+    }
+  }
+
+  handleUpload = event => {
+    if (this.uploadInput.files[0]) {
+      let file = this.uploadInput.files[0];
+      this.getBase64(file, result => {
+        fetch(
+          "https://o1embtlbrb.execute-api.us-west-2.amazonaws.com/Dev/upload-sneaker",
+          {
+            method: "POST",
+            body: JSON.stringify({ sneaker: result.split(",")[1] })
+          }
+        )
+          .then(response => response.json())
+          .then(data =>
+            this.setState({
+              key: data.key,
+              cameraOn: false,
+              image: false,
+              dataUri: result,
+              loading: true,
+              message: "UPLOAD AN IMAGE"
+            })
+          )
+          .catch(err => console.log(err));
+      });
+    } else {
+      return null;
+    }
+  };
+
+  handleChange = e => {
+    if (this.uploadInput.files[0]) {
+      let file = this.uploadInput.files[0];
+      this.getBase64(file, result => {
+        this.setState({
+          dataUri: result,
+          cameraOn: false,
+          image: true,
+          prediction: false
+        });
+      });
+    }
   };
 
   render() {
-    const Success_message = () => (
-      <div style={{ padding: 50 }}>
-        <h3 style={{ color: "green" }}>SUCCESSFUL UPLOAD</h3>
-        <a href={this.state.url}>Access the file here</a>
-        <br />
-      </div>
-    );
-
     return (
       <div className="App">
         <center>
-          <h1>SNEAKER WIZ</h1>
-          <h2>Take a picture or upload a shoe!</h2>
-          <Camera
-            onTakePhoto={dataUri => {
-              this.onTakePhoto(dataUri);
-            }}
-          />
-          {this.state.success ? <Success_message /> : null}
-          <input
-            onChange={this.handleChange}
-            ref={ref => {
-              this.uploadInput = ref;
-            }}
-            type="file"
-          />
-          <br />
-          <button onClick={this.handleUpload}>UPLOAD</button>
+          <div className="wizard">
+            <h1>SNEAKER WIZ</h1>
+            {this.state.loading
+              ? setTimeout(() => {
+                  this.predictShoe(
+                    "https://z1wj4hjige.execute-api.us-west-2.amazonaws.com/Prod/invocations",
+                    {
+                      method: "POST",
+                      body: JSON.stringify({
+                        url:
+                          "https://d3volmxa3y6u91.cloudfront.net/cropped_images/" +
+                          this.state.key
+                      })
+                    }
+                  );
+                }, 2500)
+              : null}
+            {this.state.loading ? (
+              <Loader type="Puff" color="#FFfFFF" height="200" width="200" />
+            ) : null}
+            {this.state.image ? (
+              <div className="prediction">
+                <img
+                  className="shoeImg"
+                  src={this.state.dataUri}
+                  alt="user uploaded shoe"
+                />
+                {this.state.prediction ? (
+                  <div>
+                    {parseFloat(this.state.confidence) > 85 ? (
+                      <div className="prediction">
+                        <p>
+                          I'm <span>{this.state.confidence}</span> these are{" "}
+                          <span>{this.state.shoeclass}</span>
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <p>We were unable to identify this shoe. Try again!</p>
+                      </div>
+                    )}
+
+                    <button className="openCamera" onClick={this.showCamera}>
+                      Take another photo!
+                    </button>
+                  </div>
+                ) : null}
+                {/* <p>
+                  I'm <span>{this.state.confidence}</span> these are{" "}
+                  <span>{this.state.shoeclass}</span>
+                </p>
+                <button className="openCamera" onClick={this.showCamera}>
+                  Take another photo!
+                </button> */}
+              </div>
+            ) : null}
+            {this.state.cameraOn ? (
+              <div className="camera">
+                <Camera
+                  imageType={IMAGE_TYPES.JPG}
+                  idealResolution={{ width: 1080, height: 720 }}
+                  onTakePhoto={dataUri => {
+                    this.onTakePhoto(dataUri);
+                  }}
+                />
+              </div>
+            ) : null}
+            {this.state.loading ? null : (
+              <div className="uploader">
+                <input
+                  className="inputfile"
+                  id="inputfile"
+                  name="input"
+                  ref={ref => {
+                    this.uploadInput = ref;
+                  }}
+                  onChange={this.handleChange}
+                  type="file"
+                  accept="image/png, image/jpeg"
+                />
+                <label htmlFor="inputfile">
+                  CHOOSE YOUR <span role="img">👟</span>
+                </label>
+                <button className="uploadButton" onClick={this.handleUpload}>
+                  UPLOAD
+                </button>
+                {/* {this.state.upload ? (
+                  <div>
+                    <input
+                      className="inputfile"
+                      id="inputfile"
+                      name="input"
+                      onChange={this.handleChange}
+                      ref={ref => {
+                        console.log(ref);
+                        this.uploadInput = ref;
+                      }}
+                      type="file"
+                      accept="image/png, image/jpeg"
+                    />
+                    <label htmlFor="inputfile">
+                      CHOOSE YOUR <span role="img">👟</span>
+                    </label>
+                  </div>
+                ) : (
+                  <button className="uploadButton" onClick={this.handleUpload}>
+                    UPLOAD
+                  </button>
+                )} */}
+              </div>
+            )}
+          </div>
         </center>
       </div>
     );

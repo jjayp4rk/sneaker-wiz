@@ -1,32 +1,120 @@
 .App {
-  margin-top: 20%;
+  margin-top: 10%;
   margin-left: auto;
   margin-right: auto;
   text-align: center;
   max-width: 400px;
-  height: 500px;
-  border: solid;
+  height: 600px;
+  background-image: url("./img/sneaker_wallpaper.png");
+  background-size: cover;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 40vmin;
-  pointer-events: none;
+.App h1 {
+  color: white;
+  background-color: red;
+  font-style: italic;
+  margin-left: 55px;
+  margin-right: 55px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  margin-top: 12px;
+  margin-bottom: 40px;
+}
+/* .App center {
+  background-color: rgba(250, 247, 247, 0.6);
+} */
+
+.shoeImg {
+  width: 200px;
+  height: 200px;
+  border-radius: 100%;
+  border-color: white;
+  border-width: 10px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+.wizard {
+  padding-top: 40px;
+  padding-bottom: 60px;
+}
+
+.prediction span {
+  font-weight: bold;
+  font-size: 14px;
+  font-style: italic;
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.prediction p {
+  color: white;
+  font-size: 14px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  background-color: black;
+}
+
+.openCamera {
+  color: white;
+  background-color: black;
+  border-radius: 0;
+  border-color: black;
+  font-size: 1.25em;
+  font-weight: 700;
+  display: inline-block;
+  padding: 6px 10px;
+  margin-left: 5px;
+}
+
+.inputfile {
+  opacity: 0;
+  position: absolute;
+  pointer-events: none;
+  width: 1px;
+  height: 1px;
+}
+
+.inputfile + label {
+  margin-top: 3px;
+  font-size: 1.25em;
+  font-weight: 700;
+  color: white;
+  background-color: black;
+  display: inline-block;
+  padding: 4px 10px;
+}
+
+.inputfile + label {
+  cursor: pointer;
+}
+
+.inputfile + label * {
+  pointer-events: none;
+}
+
+.inputfile:focus + label,
+.inputfile + label:hover {
+  background-color: red;
+}
+
+.uploader {
+  margin-top: 20px;
+}
+
+.uploadButton {
+  color: white;
+  background-color: black;
+  border-radius: 0;
+  font-style: italic;
+  border-color: black;
+  font-size: 1.4em;
+  font-weight: 700;
+  display: inline-block;
+  padding: 6px 10px;
+  margin-left: 5px;
+}
+
+.uploadButton:hover {
+  background-color: red;
+  border-color: red;
 }
 
 @keyframes App-logo-spin {
