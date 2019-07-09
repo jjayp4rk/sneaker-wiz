@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./App.css";
-import Camera, { IMAGE_TYPES } from "react-html5-camera-photo";
+import Camera, { FACING_MODES, IMAGE_TYPES } from "react-html5-camera-photo";
 import "react-html5-camera-photo/build/css/index.css";
 import "./Camera.css";
 import "./Emoji";
