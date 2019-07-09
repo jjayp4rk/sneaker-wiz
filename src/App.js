@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import "./App.css";
 import Camera, { IMAGE_TYPES } from "react-html5-camera-photo";
-import "./Camera.css";
+import "react-html5-camera-photo/build/css/index.css";
 import "./Emoji";
 import Loader from "react-loader-spinner";
 
