@@ -189,7 +189,7 @@ class App extends Component {
                 </button> */}
               </div>
             ) : null}
-            {this.state.cameraOn ? (
+            {/* {this.state.cameraOn ? (
               <div className="camera">
                 <Camera
                   imageType={IMAGE_TYPES.JPG}
@@ -200,7 +200,7 @@ class App extends Component {
                   idealFacingMode={FACING_MODES.ENVIRONMENT}
                 />
               </div>
-            ) : null}
+            ) : null} */}
             {this.state.loading ? null : (
               <div className="uploader">
                 <input
