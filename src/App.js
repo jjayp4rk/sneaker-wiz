@@ -116,17 +116,18 @@ class App extends Component {
   };
 
   handleChange = e => {
-    if (this.uploadInput.files[0]) {
-      let file = this.uploadInput.files[0];
-      this.getBase64(file, result => {
-        this.setState({
-          dataUri: result,
-          cameraOn: false,
-          image: true,
-          prediction: false
-        });
-      });
-    }
+    console.log(e);
+    // if (this.uploadInput.files[0]) {
+    //   let file = this.uploadInput.files[0];
+    //   this.getBase64(file, result => {
+    //     this.setState({
+    //       dataUri: result,
+    //       cameraOn: false,
+    //       image: true,
+    //       prediction: false
+    //     });
+    //   });
+    // }
   };
 
   render() {
@@ -207,9 +208,9 @@ class App extends Component {
                   className="inputfile"
                   id="inputfile"
                   name="input"
-                  ref={ref => {
-                    this.uploadInput = ref;
-                  }}
+                  // ref={ref => {
+                  //   this.uploadInput = ref;
+                  // }}
                   onChange={this.handleChange}
                   type="file"
                   accept="image/png, image/jpeg"
